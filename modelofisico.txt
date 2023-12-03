@@ -1,0 +1,121 @@
+-- Criando o banco de dados
+DROP DATABASE IF EXISTS Lanchonete;
+CREATE DATABASE Lanchonete;
+USE Lanchonete;
+
+-- Criando a tabela de Entregadores
+CREATE TABLE Lanchonete.Entregadores (
+    CodEntregador SMALLINT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(80) NOT NULL,
+    Celular CHAR(11) NOT NULL
+);
+
+-- Criando a tabela de Endereços
+CREATE TABLE Lanchonete.Enderecos (
+    CodEndereco INT AUTO_INCREMENT PRIMARY KEY,
+    CEP CHAR(8) NOT NULL,
+    Municipio VARCHAR(60) NOT NULL,
+    UF CHAR(2) NOT NULL,
+    Logradouro VARCHAR(80) NOT NULL 
+);
+
+-- Criando a tabela de Clientes
+CREATE TABLE Lanchonete.Clientes (
+    CodCliente INT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(90) NOT NULL,
+    NumeroResidencia INT,
+    Complemento VARCHAR(45),
+    CPF CHAR(11) NOT NULL UNIQUE,
+    CodEndereco INT NOT NULL,
+    FOREIGN KEY (CodEndereco) REFERENCES Lanchonete.Enderecos(CodEndereco)
+);
+
+-- Criando a tabela de Telefones dos Clientes
+CREATE TABLE Lanchonete.ClientesTelefones (
+    CodCliente INT NOT NULL,
+    Telefone CHAR(11) NOT NULL,
+    PRIMARY KEY (CodCliente, Telefone),
+    FOREIGN KEY (CodCliente) REFERENCES Lanchonete.Clientes(CodCliente)
+);
+
+-- Criando a tabela de Pedidos
+CREATE TABLE Lanchonete.Pedidos (
+    CodPedido INT AUTO_INCREMENT PRIMARY KEY,
+    Status VARCHAR(25) NOT NULL,
+    DataEnvio TIMESTAMP NOT NULL,
+    Quantidade TINYINT NOT NULL,
+    CodEntregador SMALLINT,
+    CodCliente INT,
+    FOREIGN KEY (CodEntregador) REFERENCES Lanchonete.Entregadores(CodEntregador),
+    FOREIGN KEY (CodCliente) REFERENCES Lanchonete.Clientes(CodCliente)
+);
+
+-- Criando a tabela de Cardápio
+CREATE TABLE Lanchonete.Cardapio (
+    CodCardapio TINYINT AUTO_INCREMENT PRIMARY KEY,
+    Nome VARCHAR(45) NOT NULL,
+    Preco DECIMAL(6,2) NOT NULL
+);
+
+-- Criando a tabela de Itens dos Pedidos
+CREATE TABLE Lanchonete.ItensPedidos (
+    CodPedido INT,
+    CodCardapio TINYINT,
+    PRIMARY KEY (CodPedido, CodCardapio),
+    FOREIGN KEY (CodPedido) REFERENCES Lanchonete.Pedidos(CodPedido),
+    FOREIGN KEY (CodCardapio) REFERENCES Lanchonete.Cardapio(CodCardapio)
+);
+
+-- Inserindo dados  nos endereços
+INSERT INTO Lanchonete.Enderecos (CEP, Municipio, UF, Logradouro) VALUES
+    ('12345678', 'Avare', 'SP', 'Rua A'),
+    ('87654321', 'Avare', 'SP', 'Avenida B'),
+    ('55555555', 'Manduri', 'SP', 'Travessa C');
+
+-- Inserindo dados no cardápio
+INSERT INTO Lanchonete.Cardapio (Nome, Preco) VALUES
+    ('X-Bacon', 12.99),
+    ('X-Tudo', 14.49),
+    ('Hamburguer Simples', 9.99),
+    ('Cheeseburger', 8.99);
+
+-- Inserindo dados de clientes associados a endereços
+INSERT INTO Lanchonete.Clientes (Nome, NumeroResidencia, Complemento, CPF, CodEndereco) VALUES
+    ('Ana', 123, 'P', '12345678901', 1),
+    ('João', 456, 'Q', '98765432109', 2),
+    ('Maria', 789, 'R', '45678901234', 3);
+
+-- Inserindo dados de entregadores
+INSERT INTO Lanchonete.Entregadores (Nome, Celular) VALUES
+    ('Carlos', '9876543221'),
+    ('Mariana', '9876543222'),
+    ('Rafael', '9876543223');
+
+-- Inserindo pedidos associados a clientes e entregadores
+INSERT INTO Lanchonete.Pedidos (Status, DataEnvio, Quantidade, CodEntregador, CodCliente) VALUES
+    ('0 – em preparação', NOW(), 3, 1, 1),
+    ('1 – em entrega', NOW(), 2, 2, 2),
+    ('2 – entregue', NOW(), 1, 3, 3);
+
+-- Inserindo itens de pedido  associados a pedidos de lanches do cardápio
+INSERT INTO Lanchonete.ItensPedidos (CodPedido, CodCardapio) VALUES
+    (1, 1),
+    (1, 2),
+    (2, 3),
+    (3, 4);
+
+-- Inserindo dados  na tabela ClientesTelefones
+INSERT INTO Lanchonete.ClientesTelefones (CodCliente, Telefone) VALUES
+    (1, '11111111111'),
+    (1, '22222222222'),
+    (2, '33333333333'),
+    (3, '44444444444'),
+    (3, '55555555555');
+
+
+-- Selecionando todos os pedidos em preparação
+SELECT * FROM Lanchonete.Pedidos WHERE Status = '0 – em preparação';
+
+
+
+
